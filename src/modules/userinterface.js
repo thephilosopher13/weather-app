@@ -1,22 +1,4 @@
-/*
-
-1. Input.
-1.1. Have an input that allows someone to put their location
-1.1.2. Allow them to search/autocomplete with the Search or Autocomplete API on the location (make this also an async function that simply returns blank if no matches)
-1.1.3. Put a submit button
-2. Weather API 'get'
-2.1. On 'submit' get the submitted location
-2.2. Look for a match with the API's list of locations (allow wrong capitalizations here, e.g. manila, Manila or MANILA for Manila, Philippines)
-2.3. Make the above an async function!
-2.4. have an error handler
-2.5. if response, proceed to step 3
-2.6. Have a resetter here in case there's info already in the display info
-3. Display info.
-3.1. There's a bunch of info in the API so process info, like weather conditions, date and temp in a list
-3.2. Put it in a display.
-3.3.
-
-*/
+import APIModule from './apifunctions';
 
 const DOMManipulation = (() => {
   const inputFactory = document.createElement('input');
@@ -71,9 +53,71 @@ const DOMManipulation = (() => {
     return location;
   };
 
-  const formSubmitHandler = (form) => {
-    form.addEventListener('submit', (e) => {
+  const locationNotFoundDivMaker = () => {
+    const div = divFactory.cloneNode();
+    div.classList.add('not-found-error');
+    div.textContent = 'Location not found.';
+
+    return div;
+  };
+
+  const outputDivMaker = (object) => {
+    const locationDiv = divFactory.cloneNode();
+    const temperatureDiv = divFactory.cloneNode();
+    const conditionDiv = divFactory.cloneNode();
+    const conditionTextDiv = divFactory.cloneNode();
+    const conditionIconImg = document.createElement('img');
+    const windDiv = divFactory.cloneNode();
+    const humidityDiv = divFactory.cloneNode();
+    const precipitationDiv = divFactory.cloneNode();
+    const lastUpdatedDiv = divFactory.cloneNode();
+    const outputDiv = divFactory.cloneNode();
+
+    locationDiv.classList.add('current-location');
+    temperatureDiv.classList.add('temperature');
+    conditionDiv.classList.add('conditions');
+    windDiv.classList.add('wind');
+    humidityDiv.classList.add('humidity');
+    precipitationDiv.classList.add('precipitation');
+    lastUpdatedDiv.classList.add('last-updated');
+    outputDiv.classList.add('output');
+
+    locationDiv.textContent = object.location;
+    temperatureDiv.textContent = `Temperature: ${object.temperature}`;
+    conditionTextDiv.textContent = `Weather Conditions: ${object.conditionText}`;
+    conditionIconImg.setAttribute('src', object.conditionIcon);
+    windDiv.textContent = `Wind: ${object.wind} kph`;
+    humidityDiv.textContent = `Humidity: ${object.humidity}%`;
+    precipitationDiv.textContent = `Precipitation: ${object.precipitation} mm`;
+    lastUpdatedDiv.textContent = `Last Updated: ${object.lastUpdated}`;
+
+    appendElements(conditionDiv, conditionTextDiv, conditionIconImg);
+    appendElements(outputDiv, locationDiv, temperatureDiv, conditionDiv, windDiv, humidityDiv, precipitationDiv, lastUpdatedDiv);
+
+    return outputDiv;
+  };
+
+  const locationOutput = async () => {
+    const location = locationValueGetter();
+    const dataOutput = await APIModule.getCurrentWeatherData(location);
+
+    if (dataOutput === null) {
+      return locationNotFoundDivMaker();
+    // eslint-disable-next-line no-else-return
+    } else {
+      return outputDivMaker(dataOutput);
+    }
+  };
+
+  const addFormSubmitHandler = (form) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      const outputDiv = await locationOutput();
+      const content = document.getElementById('content');
+
+      content.innerHTML = ''
+      content.appendChild(outputDiv);
 
       form.reset();
     });
@@ -88,7 +132,7 @@ const DOMManipulation = (() => {
 
     appendElements(form, input, submitButton);
 
-    // put the eventListener for submit somewhere here
+    addFormSubmitHandler(form);
 
     return form;
   };
