@@ -135,6 +135,21 @@ const DOMManipulation = (() => {
     if (suggestions) suggestions.parentNode.removeChild(suggestions);
   };
 
+  const suggestionEventListener = (item) => {
+    const locationInput = document.getElementById('weather-in-location');
+    locationInput.value = item;
+    closeList();
+  };
+
+  const suggestionItemCreator = (item) => {
+    const suggestion = divFactory.cloneNode();
+    suggestion.textContent = item;
+    suggestion.addEventListener('click', () => suggestionEventListener(item));
+    suggestion.style.cursor = 'pointer';
+
+    return suggestion;
+  };
+
   const addInputSuggestionsHandler = (input) => {
     input.addEventListener('input', async () => {
       const currentInput = locationValueGetter();
@@ -149,17 +164,10 @@ const DOMManipulation = (() => {
       input.appendChild(suggestionsDiv);
 
       // eslint-disable-next-line no-plusplus
-      for (let i = 0; i < suggestionArray.length; i++) {
-        const suggestion = divFactory.cloneNode();
-        suggestion.textContent = suggestionArray[i];
-        suggestion.addEventListener('click', () => {
-          const locationInput = document.getElementById('weather-in-location');
-          locationInput.value = suggestion.textContent;
-          closeList();
-        });
-        suggestion.style.cursor = 'pointer';
-        suggestionsDiv.appendChild(suggestion);
-      }
+      suggestionArray.forEach((suggestion) => {
+        const newSuggestion = suggestionItemCreator(suggestion);
+        suggestionsDiv.appendChild(newSuggestion);
+      });
     });
   };
 
