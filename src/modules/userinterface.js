@@ -42,6 +42,7 @@ const DOMManipulation = (() => {
     const button = inputFactory.cloneNode();
     button.type = 'Submit';
     button.value = 'Submit';
+    button.style.cursor = 'pointer';
 
     return button;
   };
@@ -61,12 +62,18 @@ const DOMManipulation = (() => {
     return div;
   };
 
+  const createSuggestionsDiv = () => {
+    const suggestionListDiv = divFactory.cloneNode();
+    suggestionListDiv.id = 'autocomplete';
+
+    return suggestionListDiv;
+  };
+
   const outputDivMaker = (object) => {
     const locationDiv = divFactory.cloneNode();
     const temperatureDiv = divFactory.cloneNode();
-    const conditionDiv = divFactory.cloneNode();
-    const conditionTextDiv = divFactory.cloneNode();
     const conditionIconImg = document.createElement('img');
+    const conditionDiv = divFactory.cloneNode();
     const windDiv = divFactory.cloneNode();
     const humidityDiv = divFactory.cloneNode();
     const precipitationDiv = divFactory.cloneNode();
@@ -75,7 +82,7 @@ const DOMManipulation = (() => {
 
     locationDiv.classList.add('current-location');
     temperatureDiv.classList.add('temperature');
-    conditionDiv.classList.add('conditions');
+    conditionDiv.classList.add('condition-icon');
     windDiv.classList.add('wind');
     humidityDiv.classList.add('humidity');
     precipitationDiv.classList.add('precipitation');
@@ -83,15 +90,14 @@ const DOMManipulation = (() => {
     outputDiv.classList.add('output');
 
     locationDiv.textContent = object.location;
-    temperatureDiv.textContent = `Temperature: ${object.temperature}`;
-    conditionTextDiv.textContent = `Weather Conditions: ${object.conditionText}`;
+    temperatureDiv.textContent = `${object.temperature}°C`;
     conditionIconImg.setAttribute('src', object.conditionIcon);
     windDiv.textContent = `Wind: ${object.wind} kph`;
     humidityDiv.textContent = `Humidity: ${object.humidity}%`;
     precipitationDiv.textContent = `Precipitation: ${object.precipitation} mm`;
     lastUpdatedDiv.textContent = `Last Updated: ${object.lastUpdated}`;
+    conditionDiv.appendChild(conditionIconImg);
 
-    appendElements(conditionDiv, conditionTextDiv, conditionIconImg);
     appendElements(outputDiv, locationDiv, temperatureDiv, conditionDiv, windDiv, humidityDiv, precipitationDiv, lastUpdatedDiv);
 
     return outputDiv;
@@ -116,10 +122,46 @@ const DOMManipulation = (() => {
       const outputDiv = await locationOutput();
       const content = document.getElementById('content');
 
-      content.innerHTML = ''
+      content.innerHTML = '';
       content.appendChild(outputDiv);
 
       form.reset();
+    });
+  };
+
+  const closeList = () => {
+    let suggestions = document.getElementById('autocomplete');
+    if (suggestions)
+        suggestions.parentNode.removeChild(suggestions);
+   };
+
+  const addInputSuggestionsHandler = (input) => {
+
+    input.addEventListener('input', async () => {
+      const currentInput = locationValueGetter();
+      const suggestionArray = await APIModule.getAutocompleteOptions(currentInput);
+      console.log(suggestionArray);
+      closeList();
+
+      if (suggestionArray === null) {
+        return;
+      }
+
+      const suggestionsDiv = createSuggestionsDiv();
+      input.appendChild(suggestionsDiv);
+  
+  
+      for (let i = 0; i < suggestionArray.length; i++) {
+        const suggestion = divFactory.cloneNode();
+        suggestion.textContent = suggestionArray[i];
+        suggestion.addEventListener('click', () => {
+          const locationInput = document.getElementById('weather-in-location')
+          locationInput.value = suggestion.textContent;
+          closeList();
+      });
+        suggestion.style.cursor = 'pointer';
+        suggestionsDiv.appendChild(suggestion);
+      }
     });
   };
 
@@ -132,6 +174,7 @@ const DOMManipulation = (() => {
 
     appendElements(form, input, submitButton);
 
+    addInputSuggestionsHandler(input);
     addFormSubmitHandler(form);
 
     return form;
@@ -148,6 +191,8 @@ const DOMManipulation = (() => {
 
   const createFooter = () => {
     const footer = document.createElement('footer');
+
+    footer.textContent = "Copyright © 2023 thephilosopher13 Image taken from unsplash, WeatherAPI used in website."
 
     return footer;
   };

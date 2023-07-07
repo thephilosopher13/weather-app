@@ -11,10 +11,9 @@ const APIModule = (() => {
 
   const getAutocompleteLocations = (arrayOfObjects) => arrayOfObjects.map((obj) => obj.name);
 
-  const currentWeatherFactory = (location, temperature, conditionText, conditionIcon, wind, humidity, precipitation, lastUpdated) => ({
+  const currentWeatherFactory = (location, temperature, conditionIcon, wind, humidity, precipitation, lastUpdated) => ({
     location,
     temperature,
-    conditionText,
     conditionIcon,
     wind,
     humidity,
@@ -28,41 +27,40 @@ const APIModule = (() => {
 
     const location = `${locationName}, ${locationCountry}`;
     const temperature = data.current.temp_c;
-    const conditionText = data.current.condition.text;
     const conditionIcon = data.current.condition.icon;
     const wind = data.current.wind_kph;
     const humidity = data.current.humidity;
     const precipitation = data.current.precip_mm;
     const lastUpdated = data.current.last_updated;
 
-    return currentWeatherFactory(location, temperature, conditionText, conditionIcon, wind, humidity, precipitation, lastUpdated);
+    return currentWeatherFactory(location, temperature, conditionIcon, wind, humidity, precipitation, lastUpdated);
   };
 
-  async function getAutocompleteOptions(currentInput) {
+  const getAutocompleteOptions = async (currentInput) => {
     const myAPIKey = APIKey.getAPIKey();
     const endpoint = buildRequestURL('search', myAPIKey, currentInput);
     try {
       const response = await fetch(endpoint, { mode: 'cors' });
-      // if response body is empty just get through with it
+      if (!response.ok) return null;
       const data = getAutocompleteLocations(await response.json());
       return data;
     } catch (error) {
       return null;
     }
-  }
+  };
 
-  async function getCurrentWeatherData(location) {
+  const getCurrentWeatherData = async (location) => {
     const myAPIKey = APIKey.getAPIKey();
     const endpoint = buildRequestURL('current', myAPIKey, location);
     try {
       const response = await fetch(endpoint, { mode: 'cors' });
-      if (!response.ok) return null
+      if (!response.ok) return null;
       const data = convertDataToObject(await response.json());
       return data;
     } catch (error) {
       return null;
     }
-  }
+  };
 
   return {
     getAutocompleteOptions,
