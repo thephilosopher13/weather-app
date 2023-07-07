@@ -11,6 +11,7 @@ const APIModule = (() => {
 
   const getAutocompleteLocations = (arrayOfObjects) => arrayOfObjects.map((obj) => obj.name);
 
+  // eslint-disable-next-line max-len
   const currentWeatherFactory = (location, temperature, conditionIcon, wind, humidity, precipitation, lastUpdated) => ({
     location,
     temperature,
@@ -33,6 +34,7 @@ const APIModule = (() => {
     const precipitation = data.current.precip_mm;
     const lastUpdated = data.current.last_updated;
 
+    // eslint-disable-next-line max-len
     return currentWeatherFactory(location, temperature, conditionIcon, wind, humidity, precipitation, lastUpdated);
   };
 

@@ -1,4 +1,4 @@
 import './style/style.css';
-import init from './modules/userinterface'
+import init from './modules/userinterface';
 
 init();

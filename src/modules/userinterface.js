@@ -98,6 +98,7 @@ const DOMManipulation = (() => {
     lastUpdatedDiv.textContent = `Last Updated: ${object.lastUpdated}`;
     conditionDiv.appendChild(conditionIconImg);
 
+    // eslint-disable-next-line max-len
     appendElements(outputDiv, locationDiv, temperatureDiv, conditionDiv, windDiv, humidityDiv, precipitationDiv, lastUpdatedDiv);
 
     return outputDiv;
@@ -130,17 +131,14 @@ const DOMManipulation = (() => {
   };
 
   const closeList = () => {
-    let suggestions = document.getElementById('autocomplete');
-    if (suggestions)
-        suggestions.parentNode.removeChild(suggestions);
-   };
+    const suggestions = document.getElementById('autocomplete');
+    if (suggestions) suggestions.parentNode.removeChild(suggestions);
+  };
 
   const addInputSuggestionsHandler = (input) => {
-
     input.addEventListener('input', async () => {
       const currentInput = locationValueGetter();
       const suggestionArray = await APIModule.getAutocompleteOptions(currentInput);
-      console.log(suggestionArray);
       closeList();
 
       if (suggestionArray === null) {
@@ -149,16 +147,16 @@ const DOMManipulation = (() => {
 
       const suggestionsDiv = createSuggestionsDiv();
       input.appendChild(suggestionsDiv);
-  
-  
+
+      // eslint-disable-next-line no-plusplus
       for (let i = 0; i < suggestionArray.length; i++) {
         const suggestion = divFactory.cloneNode();
         suggestion.textContent = suggestionArray[i];
         suggestion.addEventListener('click', () => {
-          const locationInput = document.getElementById('weather-in-location')
+          const locationInput = document.getElementById('weather-in-location');
           locationInput.value = suggestion.textContent;
           closeList();
-      });
+        });
         suggestion.style.cursor = 'pointer';
         suggestionsDiv.appendChild(suggestion);
       }
@@ -192,7 +190,7 @@ const DOMManipulation = (() => {
   const createFooter = () => {
     const footer = document.createElement('footer');
 
-    footer.textContent = "Copyright © 2023 thephilosopher13 Image taken from unsplash, WeatherAPI used in website."
+    footer.textContent = 'Copyright © 2023 thephilosopher13 Image taken from unsplash, WeatherAPI used in website.';
 
     return footer;
   };
